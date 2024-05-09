@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="colorPrimary">#5C5C5C</color>
+    <color name="colorSecondary">#B3B3B3</color>
+    <color name="colorPrimaryDark">#B3B3B3</color>
+    <color name="colorBackgroundNight">#131313</color>
+    <color name="colorPrimaryDarkNight">#252525</color>
+    <color name="green">#00A13B</color>
+
+<!--    ItemList colors 1-->
+    <color name="color1">#D8E466</color>
+    <color name="color2">#81DFEC</color>
+    <color name="color3">#7FE383</color>
+    <color name="color4">#F1B2EC</color>
+    <color name="color5">#E8C88F</color>
+    <color name="color6">#C4BDEF</color>
+    <color name="color7">#F1A4B5</color>
+
+    <!--    ItemList colors 2-->
+    <color name="color21">#9E857D</color>
+    <color name="color22">#5F5A4D</color>
+    <color name="color23">#4F493F</color>
+    <color name="color24">#736A59</color>
+    <color name="color25">#7C7366</color>
+    <color name="color26">#897E65</color>
+    <color name="color27">#969286</color>
+
+</resources>

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "500481898955",
+    "project_id": "list-maker-2d52c",
+    "storage_bucket": "list-maker-2d52c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:500481898955:android:a61dbaf80aa4d286075e4e",
+        "android_client_info": {
+          "package_name": "com.example.listmaker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCf_K3g0XaKcc4KO6cMowgeqNwj3eFiVjU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
