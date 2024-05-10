@@ -12,6 +12,9 @@
         android:layout_height="match_parent">
 
         <ImageView
+            android:paddingTop="10dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="10dp"
             android:id="@+id/ivMakeListBack"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -23,7 +26,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="48dp"
             android:layout_marginEnd="20dp"
             app:endIconMode="clear_text"
             app:layout_anchor="@id/ivMakeListBack">
@@ -40,7 +43,7 @@
             android:id="@+id/sliderMakeList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="100dp"
+            android:layout_marginTop="108dp"
             android:stepSize="5"
             android:valueFrom="5"
             android:valueTo="40"
@@ -50,7 +53,7 @@
             android:id="@+id/btnCreate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="160dp"
+            android:layout_marginTop="168dp"
             android:layout_marginEnd="20dp"
             android:paddingStart="40dp"
             android:paddingEnd="40dp"
@@ -63,7 +66,7 @@
             android:id="@+id/svMakeList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="230dp"
+            android:layout_marginTop="238dp"
             app:layout_anchor="@id/sliderMakeList">
 
             <androidx.recyclerview.widget.RecyclerView
@@ -88,7 +91,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
-            android:layout_marginTop="160dp"
+            android:layout_marginTop="168dp"
             android:backgroundTint="@color/green"
             android:paddingStart="40dp"
             android:paddingEnd="40dp"

@@ -11,12 +11,16 @@ import android.widget.Button
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.ViewModelProvider
 import com.example.listmaker.R
 import com.example.listmaker.model.Item
 import com.example.listmaker.model.ItemList
+import com.example.listmaker.viewmodel.ItemListViewModel
 import jp.wasabeef.blurry.Blurry
 
-class AddItemListFragment(private val itemList: ItemList, private val onUpdate: (Item) -> Unit) : DialogFragment() {
+class AddItemListFragment(private val itemList: ItemList) : DialogFragment() {
+
+    private lateinit var itemListViewModel: ItemListViewModel
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
@@ -32,12 +36,15 @@ class AddItemListFragment(private val itemList: ItemList, private val onUpdate: 
             val inflater = requireActivity().layoutInflater
             val view = inflater.inflate(R.layout.fragment_add_item_list, null)
 
+            // Set ViewModel
+            itemListViewModel = ViewModelProvider(this)[ItemListViewModel::class.java]
+
             // Set up the EditText and Button
             val etAddItemList = view.findViewById<EditText>(R.id.etAddItemList)
             val btnAddItemListOk = view.findViewById<Button>(R.id.btnAddItemListOk)
             btnAddItemListOk.setOnClickListener {
                 val name = etAddItemList.text.toString()
-                onUpdate(Item(name = name, itemListId = itemList.id))
+                itemListViewModel.upsertItem(Item(name = name, itemListId = itemList.id))
                 dismiss()
             }
             val btnAddItemListCancel = view.findViewById<Button>(R.id.btnAddItemListCancel)

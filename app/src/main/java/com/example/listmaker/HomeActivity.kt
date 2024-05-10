@@ -16,11 +16,13 @@ import android.widget.TextView
 import android.widget.TextView.OnEditorActionListener
 import android.widget.Toast
 import androidx.compose.ui.graphics.Color
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.listmaker.adapter.ItemListAdapter
 import com.example.listmaker.databinding.ActivityHomeBinding
+import com.example.listmaker.model.ItemList
 import com.example.listmaker.model.ItemListWithItems
 import com.example.listmaker.viewmodel.ItemListTrashViewModel
 import com.example.listmaker.viewmodel.ItemListViewModel
@@ -55,12 +57,6 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListClickUpdateInt
     private fun setAdapter() {
         itemListAdapter = ItemListAdapter(
             this,
-            onUpdateItemList = { itemList ->
-                itemListViewModel.upsertItemList(itemList)
-            },
-            onUpdateItem = { item ->
-                itemListViewModel.upsertItem(item)
-            },
             onDeleteItemList = { itemListWithItems ->
                 // Move to Trash
                 itemListTrashViewModel.upsertItemList(itemListWithItems.itemList!!)
@@ -72,9 +68,6 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListClickUpdateInt
                 itemListWithItems.items?.forEach { item ->
                     itemListViewModel.deleteItem(item)
                 }
-            },
-            onDeleteItem = { item ->
-                itemListViewModel.deleteItem(item)
             },
             showMenuDeleteSelected = { show ->
                 showMenuDeleteSelected(show)
@@ -209,10 +202,11 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListClickUpdateInt
         binding.sbHomeSearch.menu.findItem(R.id.menuHomeDeleteSelected).isVisible = show
     }
 
-    override fun onItemListClick(currentItemListWithItems: ItemListWithItems) {
-//        Intent(this, ItemListActivity(currentItemListWithItems)::class.java).also {
-////            it.putExtra("EXTRA_CURRENT_ITEM_LIST_WITH_ITEMS", currentItemListWithItems)
-//            startActivity(it)
-//        }
+    override fun onItemListClick(position: Int) {
+        Intent(this, ItemListActivity::class.java).also {
+            it.putExtra("EXTRA_POSITION", position)
+            val options = ActivityOptionsCompat.makeCustomAnimation(this, R.anim.slide_in_bottom, R.anim.slide_out_top).toBundle()
+            startActivity(it, options)
+        }
     }
 }

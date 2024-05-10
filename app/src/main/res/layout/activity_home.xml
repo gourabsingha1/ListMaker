@@ -27,7 +27,7 @@
                 android:paddingStart="8dp"
                 android:paddingEnd="8dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/layout_item_list" />
+                tools:listitem="@layout/layout_item_list_home" />
 
         </androidx.core.widget.NestedScrollView>
 

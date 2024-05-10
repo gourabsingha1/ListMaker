@@ -10,22 +10,18 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.listmaker.adapter.ItemAdapter
-import com.example.listmaker.adapter.ItemListAdapter
 import com.example.listmaker.databinding.ActivityMakeListBinding
 import com.example.listmaker.model.Item
-import com.example.listmaker.model.ItemListWithItems
 import com.example.listmaker.viewmodel.ItemListViewModel
 import com.google.ai.client.generativeai.GenerativeModel
-import com.google.android.material.search.SearchBar
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class MakeListActivity : AppCompatActivity(), ItemListAdapter.ItemListClickUpdateInterface {
+class MakeListActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMakeListBinding
     private lateinit var itemAdapter: ItemAdapter
-    private lateinit var itemListAdapter: ItemListAdapter
     private lateinit var itemListViewModel: ItemListViewModel
     private val itemsFromAI = arrayListOf<Item>()
 
@@ -49,24 +45,6 @@ class MakeListActivity : AppCompatActivity(), ItemListAdapter.ItemListClickUpdat
                 itemListViewModel.upsertItem(item)
             })
 
-        itemListAdapter = ItemListAdapter(
-            this,
-            onUpdateItemList = { itemList ->
-                itemListViewModel.upsertItemList(itemList)
-            },
-            onUpdateItem = { item ->
-                itemListViewModel.upsertItem(item)
-            },
-            onDeleteItemList = { itemListWithItems ->
-                itemListViewModel.deleteItemList(itemListWithItems.itemList!!)
-            },
-            onDeleteItem = { item ->
-                itemListViewModel.deleteItem(item)
-            },
-            showMenuDeleteSelected = { show ->
-                showMenuDeleteSelected(show)
-            })
-
         // RecyclerView
         val rvMakeList = findViewById<RecyclerView>(R.id.rvMakeList)
         rvMakeList.apply {
@@ -76,9 +54,6 @@ class MakeListActivity : AppCompatActivity(), ItemListAdapter.ItemListClickUpdat
 
         // ViewModel
         itemListViewModel = ViewModelProvider(this)[ItemListViewModel::class.java]
-        itemListViewModel.itemListsWithItems.observe(this) { itemListsWithItems ->
-            itemListAdapter.updateItemListsWithItems(itemListsWithItems)
-        }
 
         // Create list
         binding.btnCreate.setOnClickListener {
@@ -142,14 +117,5 @@ class MakeListActivity : AppCompatActivity(), ItemListAdapter.ItemListClickUpdat
             itemsFromAI.add(Item(name = name))
         }
         itemAdapter.updateItems(itemsFromAI)
-    }
-
-    // Show delete menu
-    private fun showMenuDeleteSelected(show: Boolean) {
-        findViewById<SearchBar>(R.id.sbHomeSearch).menu.findItem(R.id.menuHomeDeleteSelected).isVisible = show
-    }
-
-    override fun onItemListClick(currentItemListWithItems: ItemListWithItems) {
-
     }
 }
