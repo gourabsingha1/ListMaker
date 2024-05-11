@@ -25,12 +25,6 @@ class EditItemListFragment(private val itemList: ItemList) : DialogFragment() {
         return activity?.let {
             val builder = AlertDialog.Builder(it)
 
-            // Apply the blur effect
-            val rootView = activity?.window?.decorView?.findViewById<View>(android.R.id.content)
-            if (rootView != null) {
-                Blurry.with(context).radius(10).sampling(4).onto(rootView as ViewGroup)
-            }
-
             // Inflate the custom layout
             val inflater = requireActivity().layoutInflater
             val view = inflater.inflate(R.layout.fragment_edit_item_list, null)
@@ -64,14 +58,5 @@ class EditItemListFragment(private val itemList: ItemList) : DialogFragment() {
 
             builder.create()
         } ?: throw IllegalStateException("Activity cannot be null")
-    }
-
-    override fun onDismiss(dialog: DialogInterface) {
-        super.onDismiss(dialog)
-        // Remove the blur effect
-        val rootView = activity?.window?.decorView?.findViewById<View>(android.R.id.content)
-        if (rootView != null) {
-            Blurry.delete(rootView as ViewGroup)
-        }
     }
 }

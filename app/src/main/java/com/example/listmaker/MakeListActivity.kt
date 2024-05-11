@@ -1,6 +1,9 @@
 package com.example.listmaker
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.net.NetworkInfo
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
@@ -38,7 +41,7 @@ class MakeListActivity : AppCompatActivity() {
         // Initialize Adapter
         itemAdapter = ItemAdapter(
             mutableListOf(),
-            onDelete = {item ->
+            onDelete = { item ->
                 itemListViewModel.deleteItem(item)
             },
             onUpdate = { item ->
@@ -58,8 +61,21 @@ class MakeListActivity : AppCompatActivity() {
         // Create list
         binding.btnCreate.setOnClickListener {
             it.hideKeyboard()
-            binding.pbSearch.visibility = View.VISIBLE
 
+            // If internet is off, show Toast
+            val connectivityManager =
+                getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val networkCapabilities =
+                connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+            val isConnected = networkCapabilities != null &&
+                    networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                    networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+            if (!isConnected) {
+                Toast.makeText(this, "No connection", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            binding.pbSearch.visibility = View.VISIBLE
             try {
                 val generativeModel = GenerativeModel(
                     modelName = "gemini-pro",
@@ -68,7 +84,8 @@ class MakeListActivity : AppCompatActivity() {
                 CoroutineScope(Dispatchers.IO).launch {
                     val sliderVal = binding.sliderMakeList.value
                     val itemListName = binding.etListName.text.toString().trim()
-                    val searchQuery = "Maximum $sliderVal items of $itemListName. I just want the items in a single line separated by semi colon."
+                    val searchQuery =
+                        "Maximum $sliderVal items of $itemListName. I just want the items in a single line separated by semi colon."
                     val response = generativeModel.generateContent(searchQuery)
                     withContext(Dispatchers.Main) {
                         // Add AI generated items in the array

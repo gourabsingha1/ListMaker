@@ -6,12 +6,4 @@
         android:title="Account"
         android:icon="@drawable/baseline_person_24"
         app:showAsAction="always" />
-    <item
-        android:id="@+id/menuHomeEmptyLists"
-        android:title="Empty Lists"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/menuHomeDeleteSelected"
-        android:title="Delete Selected"
-        app:showAsAction="never" />
 </menu>

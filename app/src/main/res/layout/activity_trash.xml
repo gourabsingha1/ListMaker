@@ -44,17 +44,29 @@
                 android:paddingEnd="8dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior"
-                tools:listitem="@layout/layout_item_list_trash" />
+                tools:listitem="@layout/layout_item_list" />
 
         </androidx.core.widget.NestedScrollView>
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/ivNoListInTrash"
             android:layout_width="match_parent"
-            android:layout_height="80dp"
+            android:layout_height="100dp"
             android:layout_gravity="center"
             android:src="@drawable/baseline_delete_24"
             android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tvNoItemListTrash"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingTop="60dp"
+            android:text="No lists in Trash"
+            android:textSize="18sp"
+            android:visibility="gone"
+            app:layout_anchor="@+id/ivNoListInTrash"
+            app:layout_anchorGravity="bottom|center" />
 
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 

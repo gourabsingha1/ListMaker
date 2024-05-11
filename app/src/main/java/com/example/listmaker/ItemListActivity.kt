@@ -31,23 +31,21 @@ class ItemListActivity : AppCompatActivity() {
         }
 
         // Get position to get currentItemListWithItems
-        val position = intent.getIntExtra("EXTRA_POSITION", 0)
+        val itemListId = intent.getLongExtra("EXTRA_ITEM_LIST_ID", 0)
 
         // Set ViewModel
         itemListTrashViewModel = ViewModelProvider(this)[ItemListTrashViewModel::class.java]
         itemListViewModel = ViewModelProvider(this)[ItemListViewModel::class.java]
         itemListViewModel.itemListsWithItems.observe(this) { itemListsWithItems ->
-
-            Handler(Looper.getMainLooper()).postDelayed({
-                // Get currentItemListWithItems
-                if (position < itemListsWithItems.size) {
-                    val currentItemListWithItems = itemListsWithItems[position]
+            // Get currentItemListWithItems
+            for (currentItemListWithItems in itemListsWithItems) {
+                if (currentItemListWithItems.itemList?.id == itemListId) {
                     // Set ItemList and Items
                     binding.apply {
-                        tvItemListName.text = currentItemListWithItems.itemList?.name
+                        tvItemListName.text = currentItemListWithItems.itemList.name
                         rvItem.apply {
                             adapter = ItemAdapter(
-                                itemListsWithItems[position].items!!,
+                                currentItemListWithItems.items!!,
                                 onUpdate = { item ->
                                     itemListViewModel.upsertItem(item)
                                 },
@@ -59,13 +57,13 @@ class ItemListActivity : AppCompatActivity() {
 
                         // Edit ItemList Name
                         tvItemListName.setOnClickListener {
-                            val dialog = EditItemListFragment(currentItemListWithItems.itemList!!)
+                            val dialog = EditItemListFragment(currentItemListWithItems.itemList)
                             dialog.show(supportFragmentManager, "EditItemListDialogFragment")
                         }
 
                         // Add Item
                         ivItemListAddItem.setOnClickListener {
-                            val dialog = AddItemListFragment(currentItemListWithItems.itemList!!)
+                            val dialog = AddItemListFragment(currentItemListWithItems.itemList)
                             dialog.show(supportFragmentManager, "AddItemListDialogFragment")
                         }
 
@@ -80,8 +78,9 @@ class ItemListActivity : AppCompatActivity() {
                             finish()
                         }
                     }
+                    break
                 }
-            }, 100)
+            }
         }
     }
 

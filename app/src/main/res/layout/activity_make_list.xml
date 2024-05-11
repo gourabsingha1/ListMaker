@@ -12,12 +12,12 @@
         android:layout_height="match_parent">
 
         <ImageView
-            android:paddingTop="10dp"
-            android:paddingEnd="20dp"
-            android:paddingBottom="10dp"
             android:id="@+id/ivMakeListBack"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="10dp"
             android:src="@drawable/baseline_keyboard_backspace_24" />
 
         <com.google.android.material.textfield.TextInputLayout
@@ -31,11 +31,12 @@
             app:endIconMode="clear_text"
             app:layout_anchor="@id/ivMakeListBack">
 
-            <EditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etListName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="List Name" />
+                android:hint="List Name"
+                android:maxLines="1" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -44,10 +45,17 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="108dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
             android:stepSize="5"
             android:valueFrom="5"
-            android:valueTo="40"
-            app:layout_anchor="@id/tfListName" />
+            android:valueTo="30"
+            app:layout_anchor="@id/tfListName"
+            app:thumbHeight="20dp"
+            app:thumbWidth="20dp"
+            app:trackColor="@color/colorSecondary"
+            app:trackHeight="10dp"
+            app:trackStopIndicatorSize="0dp" />
 
         <Button
             android:id="@+id/btnCreate"
