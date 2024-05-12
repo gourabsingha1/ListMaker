@@ -2,6 +2,7 @@ package com.example.listmaker
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
@@ -40,6 +41,8 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface 
     private var selectAllToggle: Boolean = true
     private lateinit var mGoogleSignInClient: GoogleSignInClient
     private var rcSignIn : Int = 0
+    private var isSignedIn : Boolean = false
+    private var menu: Menu? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,11 +57,8 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface 
         searchQuery()
         setSearchBarMenu()
         signInWithGoogleInit()
-        val sharedPref = getSharedPreferences("MyApp", Context.MODE_PRIVATE)
-        val personPhoto = sharedPref.getString("profilePictureUrl", null)
-        if (personPhoto != null) {
-            Picasso.get().load(personPhoto).into(binding.ivPfp)
-        }
+//        showGoogleProfilePic()
+        upMenu()
 
         // Make a list
         binding.btnMakeList.setOnClickListener {
@@ -153,17 +153,33 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface 
     private fun setSearchBarMenu() {
         binding.sbHomeSearch.setOnMenuItemClickListener { item ->
             when (item.itemId) {
-                // Account
-                R.id.menuHomeAccount -> {
+                // Google Sign In
+                R.id.menuHomeSignIn -> {
                     signInWithGoogle()
-                    Toast.makeText(this, "Account", Toast.LENGTH_LONG).show()
-                    true
+                    isSignedIn = true
                 }
-                else -> super.onOptionsItemSelected(item)
+                // Sign Out
+                R.id.menuHomeSignOut -> {
+                    mGoogleSignInClient.signOut()
+                    isSignedIn = false
+                }
             }
+            super.onOptionsItemSelected(item)
         }
     }
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.home_menu, menu)
+        this.menu = menu
+        return true
+    }
 
+    private fun upMenu() {
+
+        val menuHomeSignIn = menu?.findItem(R.id.menuHomeSignIn)
+        val menuHomeSignOut = menu?.findItem(R.id.menuHomeSignOut)
+        menuHomeSignIn?.isVisible = !isSignedIn
+        menuHomeSignOut?.isVisible = isSignedIn
+    }
     // Search query
     private fun searchQuery() {
         binding.svHomeSearch.editText.addTextChangedListener(object : TextWatcher{
@@ -314,30 +330,36 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface 
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == rcSignIn) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            handleSignInResult(task)
-            Toast.makeText(this, "Signed In", Toast.LENGTH_LONG).show()
+            try {
+                val account = task.getResult(ApiException::class.java)
+//                updateUI(account)
+            } catch (e: ApiException) {
+                Log.w("HomeActivityGoogle", "signInResult:failed code=" + e.statusCode)
+//                updateUI(null)
+            }
         }
         else {
             Toast.makeText(this, "Not Signed In", Toast.LENGTH_LONG).show()
         }
     }
-    private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
-        try {
-            val account = completedTask.getResult(ApiException::class.java)
-            updateUI(account)
-        } catch (e: ApiException) {
-            Log.w("HomeActivityGoogle", "signInResult:failed code=" + e.statusCode)
-            updateUI(null)
-        }
-    }
-    private fun updateUI(account: GoogleSignInAccount?) {
-        val personPhoto = account?.photoUrl
-        // Save the URL in shared preferences
-        val sharedPref = getSharedPreferences("MyApp", Context.MODE_PRIVATE)
-        with (sharedPref.edit()) {
-            putString("profilePictureUrl", personPhoto.toString())
-            apply()
-        }
-    }
+//    private fun updateUI(account: GoogleSignInAccount?) {
+//        val personPhoto = account?.photoUrl
+//        // Save the URL in shared preferences
+//        val sharedPref = getSharedPreferences("ListMaker", Context.MODE_PRIVATE)
+//        with (sharedPref.edit()) {
+//            putString("profilePictureUrl", personPhoto.toString())
+//            apply()
+//        }
+//        if (personPhoto != null) {
+//            Picasso.get().load(personPhoto).into(binding.ivPfp)
+//        }
+//    }
+//    private fun showGoogleProfilePic() {
+//        val sharedPref = getSharedPreferences("ListMaker", Context.MODE_PRIVATE)
+//        val personPhoto = sharedPref.getString("profilePictureUrl", null)
+//        if (personPhoto != null) {
+//            Picasso.get().load(personPhoto).into(binding.ivPfp)
+//        }
+//    }
 }
 

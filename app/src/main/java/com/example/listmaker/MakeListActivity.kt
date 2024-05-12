@@ -26,6 +26,7 @@ class MakeListActivity : AppCompatActivity() {
     private lateinit var itemAdapter: ItemAdapter
     private lateinit var itemListViewModel: ItemListViewModel
     private val itemsFromAI = arrayListOf<Item>()
+    private val itemsFromCustom = arrayListOf<Item>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,17 +58,72 @@ class MakeListActivity : AppCompatActivity() {
         // ViewModel
         itemListViewModel = ViewModelProvider(this)[ItemListViewModel::class.java]
 
-        // Create list using AI
-        binding.btnCreate.setOnClickListener {
-            createListUsingAI(it)
+        // Create Custom List
+        createCustomList()
+
+        // Unset custom parts and Set AI parts
+        binding.apply {
+            btnCreateWithAI1.setOnClickListener {
+                tfItemName.visibility = View.INVISIBLE
+                btnAddItem.visibility = View.INVISIBLE
+                tvChooseNumberOfItems.visibility = View.VISIBLE
+                sliderMakeList.visibility = View.VISIBLE
+                btnCreateWithAI1.visibility = View.INVISIBLE
+                btnAddList1.visibility = View.INVISIBLE
+                btnCreateWithAI2.visibility = View.VISIBLE
+                itemAdapter.updateItems(mutableListOf())
+            }
         }
 
-        // Add the list
-        binding.btnAddList.setOnClickListener {
+        // Create list using AI
+        binding.btnCreateWithAI2.setOnClickListener {
             val itemListName = binding.etListName.text.toString().trim()
-            itemListViewModel.insertItemListWithItems(itemListName, itemsFromAI)
-            Toast.makeText(this, "List added!", Toast.LENGTH_SHORT).show()
-            finish()
+            if(itemListName == "") {
+                binding.etListName.error = "Enter a list name"
+                binding.etListName.requestFocus()
+            } else {
+                createListUsingAI(it)
+            }
+        }
+
+        // Add the AI generated list
+        binding.btnAddList2.setOnClickListener {
+            val itemListName = binding.etListName.text.toString().trim()
+            if(itemListName == "") {
+                binding.etListName.error = "Enter a list name"
+                binding.etListName.requestFocus()
+            } else {
+                itemListViewModel.insertItemListWithItems(itemListName, itemsFromAI)
+                Toast.makeText(this, "List added!", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+        }
+    }
+
+    private fun createCustomList() {
+        binding.apply {
+            btnAddItem.setOnClickListener {
+                val itemName = etItemName.text.toString().trim()
+                if(itemName == "") {
+                    etItemName.error = "Enter item name"
+                    etItemName.requestFocus()
+                } else {
+                    itemsFromCustom.add(Item(name = itemName))
+                    etItemName.text?.clear()
+                    itemAdapter.updateItems(itemsFromCustom)
+                }
+            }
+            btnAddList1.setOnClickListener {
+                val itemListName = etListName.text.toString().trim()
+                if(itemListName == "") {
+                    etListName.error = "Enter list name"
+                    etListName.requestFocus()
+                } else {
+                    itemListViewModel.insertItemListWithItems(itemListName, itemsFromCustom)
+                    Toast.makeText(this@MakeListActivity, "List added!", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
+            }
         }
     }
 
@@ -111,8 +167,8 @@ class MakeListActivity : AppCompatActivity() {
 
                     // UI Changes
                     binding.pbSearch.visibility = View.INVISIBLE
-                    binding.btnAddList.visibility = View.VISIBLE
-                    binding.btnCreate.text = "Recreate"
+                    binding.btnAddList2.visibility = View.VISIBLE
+                    binding.btnCreateWithAI2.text = "Recreate"
                 }
             }
         } catch (e: Exception) {
