@@ -11,6 +11,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <ImageView
+            android:id="@+id/ivPfp"
+            android:layout_gravity="end"
+            android:layout_marginTop="20dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp" />
+
         <androidx.core.widget.NestedScrollView
             android:id="@+id/nsvHome"
             android:layout_width="match_parent"
