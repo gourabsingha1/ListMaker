@@ -16,6 +16,7 @@ import com.example.listmaker.adapter.ItemAdapter
 import com.example.listmaker.databinding.ActivityMakeListBinding
 import com.example.listmaker.model.Item
 import com.example.listmaker.viewmodel.ItemListViewModel
+import com.example.listmaker.viewmodel.apiKeyGemini
 import com.google.ai.client.generativeai.GenerativeModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -79,7 +80,7 @@ class MakeListActivity : AppCompatActivity() {
             try {
                 val generativeModel = GenerativeModel(
                     modelName = "gemini-pro",
-                    apiKey = "AIzaSyBlRf7lSAPt887BJav5UuwmJNW4jhTTN4Q"
+                    apiKey = apiKeyGemini
                 )
                 CoroutineScope(Dispatchers.IO).launch {
                     val sliderVal = binding.sliderMakeList.value
