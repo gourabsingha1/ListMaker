@@ -5,6 +5,8 @@ import android.content.Intent
 import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -17,6 +19,7 @@ import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
 import com.example.listmaker.adapter.ItemListAdapter
+import com.example.listmaker.adapter.ItemListSearchViewAdapter
 import com.example.listmaker.databinding.ActivityHomeBinding
 import com.example.listmaker.model.ItemList
 import com.example.listmaker.model.ItemListWithItems
@@ -31,9 +34,10 @@ import com.google.android.gms.tasks.Task
 import com.google.android.material.navigation.NavigationView
 import com.squareup.picasso.Picasso
 
-class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface {
+class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface, ItemListSearchViewAdapter.ItemListSearchViewInterface {
     private lateinit var binding: ActivityHomeBinding
     private lateinit var itemListAdapter: ItemListAdapter
+    private lateinit var itemListSearchViewAdapter: ItemListSearchViewAdapter
     private lateinit var itemListViewModel: ItemListViewModel
     private lateinit var itemListTrashViewModel: ItemListTrashViewModel
     private lateinit var navDrawer: NavigationView
@@ -69,6 +73,7 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface 
     // Set Adapter
     private fun setAdapter() {
         itemListAdapter = ItemListAdapter(this)
+        itemListSearchViewAdapter = ItemListSearchViewAdapter(this)
     }
 
     // Set RecyclerView
@@ -77,7 +82,7 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface 
             adapter = itemListAdapter
         }
         binding.rvHomeSearchView.apply {
-            adapter = itemListAdapter
+            adapter = itemListSearchViewAdapter
         }
     }
 
@@ -109,7 +114,7 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface 
                         )!! || itemListWithItems.items?.any { it.name?.contains(query, ignoreCase = true)!! }!!
                     }
                 }
-                itemListAdapter.updateItemListsWithItems(filteredItems)
+                itemListSearchViewAdapter.updateItemListsWithItems(filteredItems)
             }
         }
     }
@@ -174,7 +179,6 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface 
     }
 
     private fun upMenu() {
-
         val menuHomeSignIn = menu?.findItem(R.id.menuHomeSignIn)
         val menuHomeSignOut = menu?.findItem(R.id.menuHomeSignOut)
         menuHomeSignIn?.isVisible = !isSignedIn
@@ -202,7 +206,6 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface 
     private val actionModeCallBack = object : ActionMode.Callback {
         override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
             binding.sbHomeSearch.visibility = View.GONE
-            binding.svHomeSearch.visibility = View.GONE
             menuInflater.inflate(R.menu.multiple_select_menu, menu)
             return true
         }
@@ -236,7 +239,7 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface 
                             if (currentItemListWithItems.itemList?.selected == true) {
                                 // Move to TrashActivity
                                 currentItemListWithItems.itemList.selected = false
-                                itemListTrashViewModel.upsertItemList(currentItemListWithItems.itemList!!)
+                                itemListTrashViewModel.upsertItemList(currentItemListWithItems.itemList)
                                 currentItemListWithItems.items?.forEach { item ->
                                     itemListTrashViewModel.upsertItem(item)
                                 }
@@ -257,8 +260,6 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface 
         }
 
         override fun onDestroyActionMode(mode: ActionMode?) {
-            binding.sbHomeSearch.visibility = View.VISIBLE
-            binding.svHomeSearch.visibility = View.VISIBLE
             itemListViewModel.itemListsWithItems.observe(this@HomeActivity) { itemListWithItems ->
                 itemListWithItems.forEach { currentItemListWithItems ->
                     currentItemListWithItems.itemList?.selected = false
@@ -266,18 +267,9 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface 
                 itemListAdapter.notifyDataSetChanged()
                 actionMode = null
             }
-        }
-    }
-
-    // If selected, toggle select on single press. Else expand itemList
-    override fun onItemListClick(itemListId: Long, itemList: ItemList) {
-        if (actionMode == null) {
-            Intent(this, ItemListActivity::class.java).also {
-                it.putExtra("EXTRA_ITEM_LIST_ID", itemListId)
-                startActivity(it)
-            }
-        } else {
-            toggleSelection(itemList)
+            Handler(Looper.getMainLooper()).postDelayed({
+                binding.sbHomeSearch.visibility = View.VISIBLE
+            }, 500)
         }
     }
 
@@ -302,12 +294,129 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface 
         }
     }
 
+    // If selected, toggle select on single press. Else expand itemList
+    override fun onItemListClick(itemListId: Long, itemList: ItemList) {
+        if (actionMode == null) {
+            Intent(this, ItemListActivity::class.java).also {
+                it.putExtra("EXTRA_ITEM_LIST_ID", itemListId)
+                startActivity(it)
+            }
+        } else {
+            toggleSelection(itemList)
+        }
+    }
+
     // Select ItemList onLongClick
     override fun onItemListLongPress(itemList: ItemList) {
         if (actionMode == null) {
             actionMode = startActionMode(actionModeCallBack)
         }
         toggleSelection(itemList)
+    }
+
+
+    // For SearchView Similar to above
+    private val actionModeCallBackSearchView = object : ActionMode.Callback {
+        override fun onCreateActionMode(mode: ActionMode?, menu: Menu?): Boolean {
+            binding.svHomeSearch.toolbar.visibility = View.GONE
+            menuInflater.inflate(R.menu.multiple_select_menu, menu)
+            return true
+        }
+        override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
+            return true
+        }
+        override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
+            when (item?.itemId) {
+                R.id.menuMultipleSelectSelectAll -> {
+                    itemListViewModel.itemListsWithItems.observe(this@HomeActivity) { itemListWithItems ->
+                        itemListWithItems.forEach { currentItemListWithItems ->
+                            if(itemListSearchViewAdapter.allItemListsWithItems.contains(currentItemListWithItems)) {
+                                currentItemListWithItems.itemList?.selected = selectAllToggle
+                            }
+                        }
+                        if(selectAllToggle) {
+                            actionMode?.title = "${itemListSearchViewAdapter.allItemListsWithItems.size}"
+                        }
+                        else {
+                            actionMode?.finish()
+                        }
+                        selectAllToggle = !selectAllToggle
+                        itemListSearchViewAdapter.notifyDataSetChanged()
+                    }
+                    return true
+                }
+                R.id.menuMultipleSelectDelete -> {
+                    itemListViewModel.itemListsWithItems.observe(this@HomeActivity) { itemListWithItems ->
+                        itemListWithItems.forEach { currentItemListWithItems ->
+                            if (currentItemListWithItems.itemList?.selected == true) {
+                                // Move to TrashActivity
+                                currentItemListWithItems.itemList.selected = false
+                                itemListTrashViewModel.upsertItemList(currentItemListWithItems.itemList)
+                                currentItemListWithItems.items?.forEach { item ->
+                                    itemListTrashViewModel.upsertItem(item)
+                                }
+                                // Delete from HomeActivity
+                                itemListViewModel.deleteItemList(currentItemListWithItems.itemList)
+                                currentItemListWithItems.items?.forEach { item ->
+                                    itemListViewModel.deleteItem(item)
+                                }
+                            }
+                        }
+                        itemListSearchViewAdapter.notifyDataSetChanged()
+                    }
+                    actionMode?.finish()
+                    return true
+                }
+            }
+            return false
+        }
+        override fun onDestroyActionMode(mode: ActionMode?) {
+            itemListViewModel.itemListsWithItems.observe(this@HomeActivity) { itemListWithItems ->
+                itemListWithItems.forEach { currentItemListWithItems ->
+                    currentItemListWithItems.itemList?.selected = false
+                }
+                itemListSearchViewAdapter.notifyDataSetChanged()
+                actionMode = null
+            }
+            Handler(Looper.getMainLooper()).postDelayed({
+                binding.svHomeSearch.toolbar.visibility = View.VISIBLE
+            }, 500)
+        }
+    }
+    private fun toggleSelectionSearchView(itemList: ItemList) {
+        itemList.selected = !itemList.selected
+        itemListSearchViewAdapter.notifyDataSetChanged()
+
+        // Show count of selected ItemLists
+        var count = 0
+        itemListViewModel.itemListsWithItems.observe(this@HomeActivity) { itemListWithItems ->
+            itemListWithItems.forEach { currentItemListWithItems ->
+                if (currentItemListWithItems.itemList?.selected == true) {
+                    count++
+                }
+            }
+        }
+        if (count == 0) {
+            actionMode?.finish()
+        } else {
+            actionMode?.title = "$count"
+        }
+    }
+    override fun onItemListClickSearchView(itemListId: Long, itemList: ItemList) {
+        if (actionMode == null) {
+            Intent(this, ItemListActivity::class.java).also {
+                it.putExtra("EXTRA_ITEM_LIST_ID", itemListId)
+                startActivity(it)
+            }
+        } else {
+            toggleSelectionSearchView(itemList)
+        }
+    }
+    override fun onItemListLongPressSearchView(itemList: ItemList) {
+        if (actionMode == null) {
+            actionMode = startActionMode(actionModeCallBackSearchView)
+        }
+        toggleSelectionSearchView(itemList)
     }
 
     private fun View.hideKeyboard() {

@@ -9,12 +9,11 @@ import com.example.listmaker.databinding.LayoutItemListBinding
 import com.example.listmaker.model.ItemList
 import com.example.listmaker.model.ItemListWithItems
 
-class ItemListAdapter(
-    private val itemListHomeInterface: ItemListHomeInterface
-) : RecyclerView.Adapter<ItemListAdapter.ItemListsViewHolder>() {
+class ItemListSearchViewAdapter(
+    private val itemListSearchViewInterface: ItemListSearchViewInterface
+) : RecyclerView.Adapter<ItemListSearchViewAdapter.ItemListsViewHolder>() {
 
-    private var allItemListsWithItems = listOf<ItemListWithItems>()
-
+    var allItemListsWithItems = listOf<ItemListWithItems>()
     inner class ItemListsViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val binding = LayoutItemListBinding.bind(itemView)
     }
@@ -44,13 +43,13 @@ class ItemListAdapter(
 
         // Select on long press
         holder.itemView.setOnLongClickListener {
-            itemListHomeInterface.onItemListLongPress(currentItemListWithItems.itemList!!)
+            itemListSearchViewInterface.onItemListLongPressSearchView(currentItemListWithItems.itemList!!)
             true
         }
 
         // If selected, toggle select on single press. Else expand itemList
         holder.itemView.setOnClickListener {
-            itemListHomeInterface.onItemListClick(currentItemListWithItems.itemList?.id!!, currentItemListWithItems.itemList)
+            itemListSearchViewInterface.onItemListClickSearchView(currentItemListWithItems.itemList?.id!!, currentItemListWithItems.itemList)
         }
 
         // Set background color
@@ -85,9 +84,9 @@ class ItemListAdapter(
         notifyDataSetChanged()
     }
 
-    interface ItemListHomeInterface {
-        fun onItemListClick(itemListId: Long, itemList: ItemList)
-        fun onItemListLongPress(itemList: ItemList)
+    interface ItemListSearchViewInterface {
+        fun onItemListClickSearchView(itemListId: Long, itemList: ItemList)
+        fun onItemListLongPressSearchView(itemList: ItemList)
     }
 }
 

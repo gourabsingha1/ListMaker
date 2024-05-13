@@ -3,6 +3,8 @@ package com.example.listmaker
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
@@ -184,7 +186,6 @@ class TrashActivity : AppCompatActivity(), ItemListTrashAdapter.ItemListTrashInt
         }
 
         override fun onDestroyActionMode(mode: ActionMode?) {
-            binding.toolbarTrash.visibility = View.VISIBLE
             itemListTrashViewModel.itemListsWithItems.observe(this@TrashActivity) { itemListWithItems ->
                 itemListWithItems.forEach { currentItemListWithItems ->
                     currentItemListWithItems.itemList?.selected = false
@@ -192,6 +193,9 @@ class TrashActivity : AppCompatActivity(), ItemListTrashAdapter.ItemListTrashInt
                 itemListTrashAdapter.notifyDataSetChanged()
                 actionMode = null
             }
+            Handler(Looper.getMainLooper()).postDelayed({
+                binding.toolbarTrash.visibility = View.VISIBLE
+            }, 500)
         }
     }
 
