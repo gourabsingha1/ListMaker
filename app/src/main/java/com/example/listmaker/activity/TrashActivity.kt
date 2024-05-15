@@ -1,4 +1,4 @@
-package com.example.listmaker
+package com.example.listmaker.activity
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
@@ -10,9 +10,11 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.core.app.ActivityOptionsCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.listmaker.R
 import com.example.listmaker.adapter.ItemListTrashAdapter
 import com.example.listmaker.databinding.ActivityTrashBinding
 import com.example.listmaker.fragment.DeleteForeverFragment
@@ -82,12 +84,24 @@ class TrashActivity : AppCompatActivity(), ItemListTrashAdapter.ItemListTrashInt
         // when toggle is opened and back is pressed, the navigation bar will close
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         navDrawer = findViewById(R.id.navDrawer)
-        navDrawer.setNavigationItemSelectedListener {
-            when (it.itemId) {
-                R.id.navTrash -> startActivity(Intent(this, TrashActivity::class.java))
-                R.id.navLists -> startActivity(Intent(this, HomeActivity::class.java))
+        navDrawer.setNavigationItemSelectedListener { menuItem ->
+            when (menuItem.itemId) {
+                R.id.navLists -> {
+                    startActivity(Intent(this, HomeActivity::class.java))
+                    this.finish()
+                }
+                R.id.navTrash -> {
+                    startActivity(Intent(this, TrashActivity::class.java))
+                    this.finish()
+                }
+                R.id.navSettings -> {
+                    binding.drawerLayoutTrash.closeDrawer(navDrawer)
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        val options = ActivityOptionsCompat.makeCustomAnimation(this, R.anim.slide_in_bottom, R.anim.slide_out_top)
+                        startActivity(Intent(this, SettingsActivity::class.java), options.toBundle())
+                    },200)
+                }
             }
-            this.finish()
             true
         }
     }
@@ -134,7 +148,7 @@ class TrashActivity : AppCompatActivity(), ItemListTrashAdapter.ItemListTrashInt
                             actionMode?.finish()
                         }
                         selectAllToggle = !selectAllToggle
-                        itemListTrashAdapter.notifyDataSetChanged()
+                        itemListTrashAdapter.updateItemListsWithItems(itemListWithItems)
                     }
                     return true
                 }
@@ -157,7 +171,7 @@ class TrashActivity : AppCompatActivity(), ItemListTrashAdapter.ItemListTrashInt
                                 }
                             }
                         }
-                        itemListTrashAdapter.notifyDataSetChanged()
+                        itemListTrashAdapter.updateItemListsWithItems(itemListWithItems)
                     }
                     actionMode?.finish()
                     return true
@@ -172,7 +186,7 @@ class TrashActivity : AppCompatActivity(), ItemListTrashAdapter.ItemListTrashInt
                                 selectedLists.add(currentItemListWithItems)
                             }
                         }
-                        itemListTrashAdapter.notifyDataSetChanged()
+                        itemListTrashAdapter.updateItemListsWithItems(itemListWithItems)
                     }
 
                     // Delete from TrashActivity
@@ -187,10 +201,13 @@ class TrashActivity : AppCompatActivity(), ItemListTrashAdapter.ItemListTrashInt
 
         override fun onDestroyActionMode(mode: ActionMode?) {
             itemListTrashViewModel.itemListsWithItems.observe(this@TrashActivity) { itemListWithItems ->
+                if(itemListWithItems.size == itemListTrashAdapter.itemCount) {
+                    selectAllToggle = true
+                }
                 itemListWithItems.forEach { currentItemListWithItems ->
                     currentItemListWithItems.itemList?.selected = false
                 }
-                itemListTrashAdapter.notifyDataSetChanged()
+                itemListTrashAdapter.updateItemListsWithItems(itemListWithItems)
                 actionMode = null
             }
             Handler(Looper.getMainLooper()).postDelayed({

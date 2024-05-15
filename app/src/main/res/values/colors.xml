@@ -6,7 +6,8 @@
     <color name="colorSecondary">#B3B3B3</color>
     <color name="colorPrimaryDark">#B3B3B3</color>
     <color name="colorBackgroundNight">#131313</color>
-    <color name="colorPrimaryDarkNight">#252525</color>
+    <color name="colorPrimaryDarkNight">#202020</color>
+    <color name="colorSecondaryNight">#2B2A2A</color>
     <color name="green">#00A13B</color>
     <color name="blue">#0153B8</color>
 

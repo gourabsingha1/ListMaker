@@ -1,12 +1,11 @@
-package com.example.listmaker
+package com.example.listmaker.activity
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.ViewModelProvider
+import com.example.listmaker.R
 import com.example.listmaker.adapter.ItemAdapter
 import com.example.listmaker.databinding.ActivityItemListBinding
 import com.example.listmaker.fragment.AddItemListFragment
@@ -28,6 +27,7 @@ class ItemListActivity : AppCompatActivity() {
         // Back press
         binding.ivItemListBack.setOnClickListener {
             finish()
+            overridePendingTransition(R.anim.slide_in_top, R.anim.slide_out_bottom)
         }
 
         // Get position to get currentItemListWithItems
@@ -84,12 +84,8 @@ class ItemListActivity : AppCompatActivity() {
         }
     }
 
-//    override fun onBackPressed() {
-//        super.onBackPressed()
-//        Intent(this, HomeActivity::class.java).also {
-//            finish()
-//            val options = ActivityOptionsCompat.makeCustomAnimation(this, R.anim.slide_in_top, R.anim.slide_out_bottom).toBundle()
-//            startActivity(it, options)
-//        }
-//    }
+    override fun onBackPressed() {
+        super.onBackPressed()
+        overridePendingTransition(R.anim.slide_in_top, R.anim.slide_out_bottom)
+    }
 }

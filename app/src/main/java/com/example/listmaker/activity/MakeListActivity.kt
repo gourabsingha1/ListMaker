@@ -1,4 +1,4 @@
-package com.example.listmaker
+package com.example.listmaker.activity
 
 import android.content.Context
 import android.net.ConnectivityManager
@@ -11,7 +11,9 @@ import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.listmaker.R
 import com.example.listmaker.adapter.ItemAdapter
+import com.example.listmaker.apiKeyGemini
 import com.example.listmaker.databinding.ActivityMakeListBinding
 import com.example.listmaker.model.Item
 import com.example.listmaker.viewmodel.ItemListViewModel

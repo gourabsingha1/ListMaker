@@ -1,8 +1,7 @@
-package com.example.listmaker
+package com.example.listmaker.activity
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.drawable.Drawable
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -16,8 +15,11 @@ import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.app.ActivityOptionsCompat
+import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.ViewModelProvider
-import com.bumptech.glide.Glide
+import com.example.listmaker.R
 import com.example.listmaker.adapter.ItemListAdapter
 import com.example.listmaker.adapter.ItemListSearchViewAdapter
 import com.example.listmaker.databinding.ActivityHomeBinding
@@ -26,13 +28,10 @@ import com.example.listmaker.model.ItemListWithItems
 import com.example.listmaker.viewmodel.ItemListTrashViewModel
 import com.example.listmaker.viewmodel.ItemListViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.tasks.Task
 import com.google.android.material.navigation.NavigationView
-import com.squareup.picasso.Picasso
 
 class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface, ItemListSearchViewAdapter.ItemListSearchViewInterface {
     private lateinit var binding: ActivityHomeBinding
@@ -42,7 +41,6 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface,
     private lateinit var itemListTrashViewModel: ItemListTrashViewModel
     private lateinit var navDrawer: NavigationView
     private var actionMode: ActionMode? = null
-    private var selectAllToggle: Boolean = true
     private lateinit var mGoogleSignInClient: GoogleSignInClient
     private var rcSignIn : Int = 0
     private var isSignedIn : Boolean = false
@@ -59,10 +57,10 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface,
         setRecyclerView()
         setViewModel()
         searchQuery()
-        setSearchBarMenu()
-        signInWithGoogleInit()
+//        setSearchBarMenu()
+//        signInWithGoogleInit()
 //        showGoogleProfilePic()
-        upMenu()
+//        upMenu()
 
         // Make a list
         binding.btnMakeList.setOnClickListener {
@@ -125,10 +123,22 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface,
         navDrawer = findViewById(R.id.navDrawer)
         navDrawer.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
-                R.id.navLists -> startActivity(Intent(this, HomeActivity::class.java))
-                R.id.navTrash -> startActivity(Intent(this, TrashActivity::class.java))
+                R.id.navLists -> {
+                    startActivity(Intent(this, HomeActivity::class.java))
+                    this.finish()
+                }
+                R.id.navTrash -> {
+                    startActivity(Intent(this, TrashActivity::class.java))
+                    this.finish()
+                }
+                R.id.navSettings -> {
+                    binding.drawerLayout.closeDrawer(navDrawer)
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        val options = ActivityOptionsCompat.makeCustomAnimation(this, R.anim.slide_in_bottom, R.anim.slide_out_top)
+                        startActivity(Intent(this, SettingsActivity::class.java), options.toBundle())
+                    },200)
+                }
             }
-            this.finish()
             true
         }
 
@@ -150,40 +160,42 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface,
         } else if(binding.svHomeSearch.isShowing) {
             binding.svHomeSearch.hide()
         } else {
+            overridePendingTransition(R.anim.slide_in_top, R.anim.slide_out_bottom)
             super.onBackPressed()
         }
     }
 
-    // Searchbar Menu
-    private fun setSearchBarMenu() {
-        binding.sbHomeSearch.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                // Google Sign In
-                R.id.menuHomeSignIn -> {
-                    signInWithGoogle()
-                    isSignedIn = true
-                }
-                // Sign Out
-                R.id.menuHomeSignOut -> {
-                    mGoogleSignInClient.signOut()
-                    isSignedIn = false
-                }
-            }
-            super.onOptionsItemSelected(item)
-        }
-    }
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.home_menu, menu)
-        this.menu = menu
-        return true
-    }
+//    // Searchbar Menu
+//    private fun setSearchBarMenu() {
+//        binding.sbHomeSearch.setOnMenuItemClickListener { item ->
+//            when (item.itemId) {
+//                // Google Sign In
+//                R.id.menuHomeSignIn -> {
+//                    signInWithGoogle()
+//                    isSignedIn = true
+//                }
+//                // Sign Out
+//                R.id.menuHomeSignOut -> {
+//                    mGoogleSignInClient.signOut()
+//                    isSignedIn = false
+//                }
+//            }
+//            super.onOptionsItemSelected(item)
+//        }
+//    }
+//    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+//        menuInflater.inflate(R.menu.home_menu, menu)
+//        this.menu = menu
+//        return true
+//    }
+//
+//    private fun upMenu() {
+//        val menuHomeSignIn = menu?.findItem(R.id.menuHomeSignIn)
+//        val menuHomeSignOut = menu?.findItem(R.id.menuHomeSignOut)
+//        menuHomeSignIn?.isVisible = !isSignedIn
+//        menuHomeSignOut?.isVisible = isSignedIn
+//    }
 
-    private fun upMenu() {
-        val menuHomeSignIn = menu?.findItem(R.id.menuHomeSignIn)
-        val menuHomeSignOut = menu?.findItem(R.id.menuHomeSignOut)
-        menuHomeSignIn?.isVisible = !isSignedIn
-        menuHomeSignOut?.isVisible = isSignedIn
-    }
     // Search query
     private fun searchQuery() {
         binding.svHomeSearch.editText.addTextChangedListener(object : TextWatcher{
@@ -218,16 +230,23 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface,
             when (item?.itemId) {
                 R.id.menuMultipleSelectSelectAll -> {
                     itemListViewModel.itemListsWithItems.observe(this@HomeActivity) { itemListWithItems ->
+                        var count = 0
                         itemListWithItems.forEach { currentItemListWithItems ->
-                            currentItemListWithItems.itemList?.selected = selectAllToggle
+                            if(currentItemListWithItems.itemList?.selected == true) {
+                                count++
+                            }
                         }
-                        if(selectAllToggle) {
+                        if(count == itemListWithItems.size) {
+                            itemListWithItems.forEach { currentItemListWithItems ->
+                                currentItemListWithItems.itemList?.selected = false
+                            }
+                            actionMode?.finish()
+                        } else {
+                            itemListWithItems.forEach { currentItemListWithItems ->
+                                currentItemListWithItems.itemList?.selected = true
+                            }
                             actionMode?.title = "${itemListWithItems.size}"
                         }
-                        else {
-                            actionMode?.finish()
-                        }
-                        selectAllToggle = !selectAllToggle
                         itemListAdapter.notifyDataSetChanged()
                     }
                     return true
@@ -260,13 +279,7 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface,
         }
 
         override fun onDestroyActionMode(mode: ActionMode?) {
-            itemListViewModel.itemListsWithItems.observe(this@HomeActivity) { itemListWithItems ->
-                itemListWithItems.forEach { currentItemListWithItems ->
-                    currentItemListWithItems.itemList?.selected = false
-                }
-                itemListAdapter.notifyDataSetChanged()
-                actionMode = null
-            }
+            actionMode = null
             Handler(Looper.getMainLooper()).postDelayed({
                 binding.sbHomeSearch.visibility = View.VISIBLE
             }, 500)
@@ -299,7 +312,8 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface,
         if (actionMode == null) {
             Intent(this, ItemListActivity::class.java).also {
                 it.putExtra("EXTRA_ITEM_LIST_ID", itemListId)
-                startActivity(it)
+                val options = ActivityOptionsCompat.makeCustomAnimation(this, R.anim.slide_in_bottom, R.anim.slide_out_top)
+                startActivity(it, options.toBundle())
             }
         } else {
             toggleSelection(itemList)
@@ -328,21 +342,24 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface,
         override fun onActionItemClicked(mode: ActionMode?, item: MenuItem?): Boolean {
             when (item?.itemId) {
                 R.id.menuMultipleSelectSelectAll -> {
-                    itemListViewModel.itemListsWithItems.observe(this@HomeActivity) { itemListWithItems ->
-                        itemListWithItems.forEach { currentItemListWithItems ->
-                            if(itemListSearchViewAdapter.allItemListsWithItems.contains(currentItemListWithItems)) {
-                                currentItemListWithItems.itemList?.selected = selectAllToggle
-                            }
+                    var count = 0
+                    itemListSearchViewAdapter.allItemListsWithItems.forEach { currentItemListWithItems ->
+                        if(currentItemListWithItems.itemList?.selected == true) {
+                            count++
                         }
-                        if(selectAllToggle) {
-                            actionMode?.title = "${itemListSearchViewAdapter.allItemListsWithItems.size}"
-                        }
-                        else {
-                            actionMode?.finish()
-                        }
-                        selectAllToggle = !selectAllToggle
-                        itemListSearchViewAdapter.notifyDataSetChanged()
                     }
+                    if(count == itemListSearchViewAdapter.allItemListsWithItems.size) {
+                        itemListSearchViewAdapter.allItemListsWithItems.forEach { currentItemListWithItems ->
+                            currentItemListWithItems.itemList?.selected = false
+                        }
+                        actionMode?.finish()
+                    } else {
+                        itemListSearchViewAdapter.allItemListsWithItems.forEach { currentItemListWithItems ->
+                            currentItemListWithItems.itemList?.selected = true
+                        }
+                        actionMode?.title = "${itemListSearchViewAdapter.allItemListsWithItems.size}"
+                    }
+                    itemListSearchViewAdapter.notifyDataSetChanged()
                     return true
                 }
                 R.id.menuMultipleSelectDelete -> {
@@ -371,13 +388,7 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface,
             return false
         }
         override fun onDestroyActionMode(mode: ActionMode?) {
-            itemListViewModel.itemListsWithItems.observe(this@HomeActivity) { itemListWithItems ->
-                itemListWithItems.forEach { currentItemListWithItems ->
-                    currentItemListWithItems.itemList?.selected = false
-                }
-                itemListSearchViewAdapter.notifyDataSetChanged()
-                actionMode = null
-            }
+            actionMode = null
             Handler(Looper.getMainLooper()).postDelayed({
                 binding.svHomeSearch.toolbar.visibility = View.VISIBLE
             }, 500)
@@ -406,7 +417,8 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface,
         if (actionMode == null) {
             Intent(this, ItemListActivity::class.java).also {
                 it.putExtra("EXTRA_ITEM_LIST_ID", itemListId)
-                startActivity(it)
+                val options = ActivityOptionsCompat.makeCustomAnimation(this, R.anim.slide_in_bottom, R.anim.slide_out_top)
+                startActivity(it, options.toBundle())
             }
         } else {
             toggleSelectionSearchView(itemList)
@@ -424,33 +436,33 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface,
         imm.hideSoftInputFromWindow(windowToken, 0)
     }
 
-    // Google Sign in
-    private fun signInWithGoogleInit() {
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestEmail()
-            .build()
-        mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
-    }
-    private fun signInWithGoogle() {
-        val signInIntent = mGoogleSignInClient.signInIntent
-        startActivityForResult(signInIntent, rcSignIn)
-    }
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == rcSignIn) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            try {
-                val account = task.getResult(ApiException::class.java)
-//                updateUI(account)
-            } catch (e: ApiException) {
-                Log.w("HomeActivityGoogle", "signInResult:failed code=" + e.statusCode)
-//                updateUI(null)
-            }
-        }
-        else {
-            Toast.makeText(this, "Not Signed In", Toast.LENGTH_LONG).show()
-        }
-    }
+//    // Google Sign in
+//    private fun signInWithGoogleInit() {
+//        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+//            .requestEmail()
+//            .build()
+//        mGoogleSignInClient = GoogleSignIn.getClient(this, gso)
+//    }
+//    private fun signInWithGoogle() {
+//        val signInIntent = mGoogleSignInClient.signInIntent
+//        startActivityForResult(signInIntent, rcSignIn)
+//    }
+//    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+//        super.onActivityResult(requestCode, resultCode, data)
+//        if (requestCode == rcSignIn) {
+//            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+//            try {
+//                val account = task.getResult(ApiException::class.java)
+////                updateUI(account)
+//            } catch (e: ApiException) {
+//                Log.w("HomeActivityGoogle", "signInResult:failed code=" + e.statusCode)
+////                updateUI(null)
+//            }
+//        }
+//        else {
+//            Toast.makeText(this, "Not Signed In", Toast.LENGTH_LONG).show()
+//        }
+//    }
 //    private fun updateUI(account: GoogleSignInAccount?) {
 //        val personPhoto = account?.photoUrl
 //        // Save the URL in shared preferences

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/navHeader"
     android:layout_width="match_parent"
     android:layout_height="80dp"
     android:background="@color/white">
@@ -7,10 +8,9 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="List Maker"
-        android:textColor="@color/colorPrimary"
-        android:layout_marginStart="30dp"
         android:layout_gravity="center"
-        android:textSize="30sp"/>
+        android:layout_marginStart="30dp"
+        android:text="List Maker"
+        android:textSize="30sp" />
 
 </LinearLayout>
