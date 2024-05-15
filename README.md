@@ -1,10 +1,20 @@
-## Bugs
-1. when a list is generated, swap(Create, Regenerate)
-but if list name is edited after generation, swap shouldn't take place
-2. sort by itemList name asc, desc, most recently used
-3. on deleting / selecting from home and searchview, screen is scrolling up unlike trashactivity 
-4. if currently in homeactivity, list item should be highlighted in navigation
-5. if an inappropriate search is made, then the result should mention it, hiding the add list and recyclerview in makelistActivity
+# List Maker
+## [Download APK](https://drive.google.com/file/d/16ppY9kSv3u-dl0xPxhxy6Gur8iPm6MQG/view?usp=sharing)
 
-## Notes
-1. Google Sign In: Gradle -> Run Gradle -> gradle signingReport -> Get SHA256 -> Put it on Firebase
+Create Lists easily using AI.
+
+## Key Features
+- Do CRUD operations on your list
+- Search lists using list name and item name
+- Create list using Gemini AI
+- Trash activity
+- Dark Theme
+
+## App Preview
+https://github.com/gourabsingha1/ListMaker/assets/110812339/c087c70a-10c3-45cc-ac8b-030074d447ba
+
+## Installations
+1. Clone the repository: git clone https://github.com/gourabsingha1/ListMaker.git
+2. Open the project in Android Studio
+3. Build and run the app on your Android device
+4. Alternatively, you can download the app from [here](https://drive.google.com/file/d/16ppY9kSv3u-dl0xPxhxy6Gur8iPm6MQG/view?usp=sharing)
