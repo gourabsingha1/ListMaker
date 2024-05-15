@@ -7,4 +7,4 @@ but if list name is edited after generation, swap shouldn't take place
 5. if an inappropriate search is made, then the result should mention it, hiding the add list and recyclerview in makelistActivity
 
 ## Notes
-1. Google Sign In: Gradle -> Run Gradle -> gradle signingReport -> Get SHA256 -> Put in on Firebase
+1. Google Sign In: Gradle -> Run Gradle -> gradle signingReport -> Get SHA256 -> Put it on Firebase
