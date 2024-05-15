@@ -43,13 +43,13 @@ class ItemListSearchViewAdapter(
 
         // Select on long press
         holder.itemView.setOnLongClickListener {
-            itemListSearchViewInterface.onItemListLongPressSearchView(currentItemListWithItems.itemList!!)
+            itemListSearchViewInterface.onItemListLongPressSearchView(currentItemListWithItems.itemList?.id!!)
             true
         }
 
         // If selected, toggle select on single press. Else expand itemList
         holder.itemView.setOnClickListener {
-            itemListSearchViewInterface.onItemListClickSearchView(currentItemListWithItems.itemList?.id!!, currentItemListWithItems.itemList)
+            itemListSearchViewInterface.onItemListClickSearchView(currentItemListWithItems.itemList?.id!!)
         }
 
         // Set background color
@@ -85,8 +85,8 @@ class ItemListSearchViewAdapter(
     }
 
     interface ItemListSearchViewInterface {
-        fun onItemListClickSearchView(itemListId: Long, itemList: ItemList)
-        fun onItemListLongPressSearchView(itemList: ItemList)
+        fun onItemListClickSearchView(itemListId: Long)
+        fun onItemListLongPressSearchView(itemListId: Long)
     }
 }
 

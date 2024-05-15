@@ -139,16 +139,25 @@ class TrashActivity : AppCompatActivity(), ItemListTrashAdapter.ItemListTrashInt
                 // Select All ItemLists
                 R.id.menuMultipleSelectTrashSelectAll -> {
                     itemListTrashViewModel.itemListsWithItems.observe(this@TrashActivity) { itemListWithItems ->
+                        var count = 0
                         itemListWithItems.forEach { currentItemListWithItems ->
-                            currentItemListWithItems.itemList?.selected = selectAllToggle
+                            if(currentItemListWithItems.itemList?.selected == true) {
+                                count++
+                            }
                         }
-                        if (selectAllToggle) {
-                            actionMode?.title = "${itemListWithItems.size}"
-                        } else {
+                        if(count == itemListWithItems.size) {
+                            itemListWithItems.forEach { currentItemListWithItems ->
+                                currentItemListWithItems.itemList?.selected = false
+                            }
                             actionMode?.finish()
+                        } else {
+                            itemListWithItems.forEach { currentItemListWithItems ->
+                                currentItemListWithItems.itemList?.selected = true
+                            }
+                            actionMode?.title = "${itemListWithItems.size}"
                         }
-                        selectAllToggle = !selectAllToggle
-                        itemListTrashAdapter.updateItemListsWithItems(itemListWithItems)
+                        itemListTrashAdapter.notifyDataSetChanged()
+//                        itemListTrashAdapter.updateItemListsWithItems(itemListWithItems)
                     }
                     return true
                 }
@@ -201,13 +210,12 @@ class TrashActivity : AppCompatActivity(), ItemListTrashAdapter.ItemListTrashInt
 
         override fun onDestroyActionMode(mode: ActionMode?) {
             itemListTrashViewModel.itemListsWithItems.observe(this@TrashActivity) { itemListWithItems ->
-                if(itemListWithItems.size == itemListTrashAdapter.itemCount) {
-                    selectAllToggle = true
-                }
                 itemListWithItems.forEach { currentItemListWithItems ->
-                    currentItemListWithItems.itemList?.selected = false
+                    if (currentItemListWithItems.itemList?.selected == true) {
+                        currentItemListWithItems.itemList.selected = false
+                    }
                 }
-                itemListTrashAdapter.updateItemListsWithItems(itemListWithItems)
+                itemListTrashAdapter.notifyDataSetChanged()
                 actionMode = null
             }
             Handler(Looper.getMainLooper()).postDelayed({
@@ -218,8 +226,14 @@ class TrashActivity : AppCompatActivity(), ItemListTrashAdapter.ItemListTrashInt
 
     // Toggle selection
     private fun toggleSelection(itemList: ItemList) {
-        itemList.selected = !itemList.selected
-        itemListTrashAdapter.notifyDataSetChanged()
+        itemListTrashViewModel.itemListsWithItems.observe(this@TrashActivity) { itemListWithItems ->
+            itemListWithItems.forEach { currentItemListWithItems ->
+                if (currentItemListWithItems.itemList?.id == itemList.id) {
+                    currentItemListWithItems.itemList.selected = !currentItemListWithItems.itemList.selected
+                    itemListTrashAdapter.notifyDataSetChanged()
+                }
+            }
+        }
 
         // Show count of selected ItemLists
         var count = 0
@@ -237,7 +251,7 @@ class TrashActivity : AppCompatActivity(), ItemListTrashAdapter.ItemListTrashInt
         }
     }
 
-    override fun onItemListClick(position: Int, itemList: ItemList) {
+    override fun onItemListClick(itemList: ItemList) {
         if (actionMode != null) {
             toggleSelection(itemList)
         }

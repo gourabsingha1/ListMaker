@@ -13,7 +13,7 @@ class ItemListAdapter(
     private val itemListHomeInterface: ItemListHomeInterface
 ) : RecyclerView.Adapter<ItemListAdapter.ItemListsViewHolder>() {
 
-    private var allItemListsWithItems = listOf<ItemListWithItems>()
+    var allItemListsWithItems = listOf<ItemListWithItems>()
 
     inner class ItemListsViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val binding = LayoutItemListBinding.bind(itemView)
@@ -44,13 +44,13 @@ class ItemListAdapter(
 
         // Select on long press
         holder.itemView.setOnLongClickListener {
-            itemListHomeInterface.onItemListLongPress(currentItemListWithItems.itemList!!)
+            itemListHomeInterface.onItemListLongPress(currentItemListWithItems.itemList?.id!!)
             true
         }
 
         // If selected, toggle select on single press. Else expand itemList
         holder.itemView.setOnClickListener {
-            itemListHomeInterface.onItemListClick(currentItemListWithItems.itemList?.id!!, currentItemListWithItems.itemList)
+            itemListHomeInterface.onItemListClick(currentItemListWithItems.itemList?.id!!)
         }
 
         // Set background color
@@ -86,8 +86,8 @@ class ItemListAdapter(
     }
 
     interface ItemListHomeInterface {
-        fun onItemListClick(itemListId: Long, itemList: ItemList)
-        fun onItemListLongPress(itemList: ItemList)
+        fun onItemListClick(itemListId: Long)
+        fun onItemListLongPress(itemListId: Long)
     }
 }
 

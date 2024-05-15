@@ -49,7 +49,7 @@ class ItemListTrashAdapter(
 
         // If selected, toggle select on single press
         holder.itemView.setOnClickListener {
-            itemListTrashInterface.onItemListClick(position, currentItemListWithItems.itemList!!)
+            itemListTrashInterface.onItemListClick(currentItemListWithItems.itemList!!)
         }
 
         // Set background color
@@ -84,7 +84,7 @@ class ItemListTrashAdapter(
     }
 
     interface ItemListTrashInterface {
-        fun onItemListClick(position: Int, itemList: ItemList)
+        fun onItemListClick(itemList: ItemList)
         fun onItemListLongPress(itemList: ItemList)
     }
 }

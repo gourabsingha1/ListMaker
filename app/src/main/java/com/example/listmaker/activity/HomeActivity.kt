@@ -279,7 +279,15 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface,
         }
 
         override fun onDestroyActionMode(mode: ActionMode?) {
-            actionMode = null
+            itemListViewModel.itemListsWithItems.observe(this@HomeActivity) { itemListWithItems ->
+                itemListWithItems.forEach { currentItemListWithItems ->
+                    if (currentItemListWithItems.itemList?.selected == true) {
+                        currentItemListWithItems.itemList.selected = false
+                    }
+                }
+                itemListAdapter.notifyDataSetChanged()
+                actionMode = null
+            }
             Handler(Looper.getMainLooper()).postDelayed({
                 binding.sbHomeSearch.visibility = View.VISIBLE
             }, 500)
@@ -287,9 +295,15 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface,
     }
 
     // Toggle selection
-    private fun toggleSelection(itemList: ItemList) {
-        itemList.selected = !itemList.selected
-        itemListAdapter.notifyDataSetChanged()
+    private fun toggleSelection(itemListId: Long) {
+        itemListViewModel.itemListsWithItems.observe(this@HomeActivity) { itemListWithItems ->
+            itemListWithItems.forEach { currentItemListWithItems ->
+                if (currentItemListWithItems.itemList?.id == itemListId) {
+                    currentItemListWithItems.itemList.selected = !currentItemListWithItems.itemList.selected
+                    itemListAdapter.notifyDataSetChanged()
+                }
+            }
+        }
 
         // Show count of selected ItemLists
         var count = 0
@@ -308,7 +322,7 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface,
     }
 
     // If selected, toggle select on single press. Else expand itemList
-    override fun onItemListClick(itemListId: Long, itemList: ItemList) {
+    override fun onItemListClick(itemListId: Long) {
         if (actionMode == null) {
             Intent(this, ItemListActivity::class.java).also {
                 it.putExtra("EXTRA_ITEM_LIST_ID", itemListId)
@@ -316,16 +330,16 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface,
                 startActivity(it, options.toBundle())
             }
         } else {
-            toggleSelection(itemList)
+            toggleSelection(itemListId)
         }
     }
 
     // Select ItemList onLongClick
-    override fun onItemListLongPress(itemList: ItemList) {
+    override fun onItemListLongPress(itemListId: Long) {
         if (actionMode == null) {
             actionMode = startActionMode(actionModeCallBack)
         }
-        toggleSelection(itemList)
+        toggleSelection(itemListId)
     }
 
 
@@ -388,15 +402,29 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface,
             return false
         }
         override fun onDestroyActionMode(mode: ActionMode?) {
-            actionMode = null
+            itemListViewModel.itemListsWithItems.observe(this@HomeActivity) { itemListWithItems ->
+                itemListWithItems.forEach { currentItemListWithItems ->
+                    if (currentItemListWithItems.itemList?.selected == true) {
+                        currentItemListWithItems.itemList.selected = false
+                    }
+                }
+                itemListSearchViewAdapter.notifyDataSetChanged()
+                actionMode = null
+            }
             Handler(Looper.getMainLooper()).postDelayed({
                 binding.svHomeSearch.toolbar.visibility = View.VISIBLE
             }, 500)
         }
     }
-    private fun toggleSelectionSearchView(itemList: ItemList) {
-        itemList.selected = !itemList.selected
-        itemListSearchViewAdapter.notifyDataSetChanged()
+    private fun toggleSelectionSearchView(itemListId: Long) {
+        itemListViewModel.itemListsWithItems.observe(this@HomeActivity) { itemListWithItems ->
+            itemListWithItems.forEach { currentItemListWithItems ->
+                if (currentItemListWithItems.itemList?.id == itemListId) {
+                    currentItemListWithItems.itemList.selected = !currentItemListWithItems.itemList.selected
+                    itemListSearchViewAdapter.notifyDataSetChanged()
+                }
+            }
+        }
 
         // Show count of selected ItemLists
         var count = 0
@@ -413,7 +441,7 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface,
             actionMode?.title = "$count"
         }
     }
-    override fun onItemListClickSearchView(itemListId: Long, itemList: ItemList) {
+    override fun onItemListClickSearchView(itemListId: Long) {
         if (actionMode == null) {
             Intent(this, ItemListActivity::class.java).also {
                 it.putExtra("EXTRA_ITEM_LIST_ID", itemListId)
@@ -421,14 +449,14 @@ class HomeActivity : AppCompatActivity(), ItemListAdapter.ItemListHomeInterface,
                 startActivity(it, options.toBundle())
             }
         } else {
-            toggleSelectionSearchView(itemList)
+            toggleSelectionSearchView(itemListId)
         }
     }
-    override fun onItemListLongPressSearchView(itemList: ItemList) {
+    override fun onItemListLongPressSearchView(itemListId: Long) {
         if (actionMode == null) {
             actionMode = startActionMode(actionModeCallBackSearchView)
         }
-        toggleSelectionSearchView(itemList)
+        toggleSelectionSearchView(itemListId)
     }
 
     private fun View.hideKeyboard() {
